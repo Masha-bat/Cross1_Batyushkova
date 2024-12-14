@@ -1,0 +1,6 @@
+@Batyushkova_lr1_HostAddress = http://localhost:5122
+
+GET {{Batyushkova_lr1_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
