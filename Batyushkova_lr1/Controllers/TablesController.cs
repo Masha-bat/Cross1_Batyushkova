@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Batyushkova_lr1.Data;
 using Batyushkova_lr1.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Batyushkova_lr1.Controllers
 {
@@ -22,14 +23,18 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // GET: api/Tables
+        // список всех столов
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Table>>> GetTable()
         {
             return await _context.Table.ToListAsync();
         }
 
         // GET: api/Tables/5
+        // стол по id
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Table>> GetTable(int id)
         {
             var table = await _context.Table.FindAsync(id);
@@ -44,7 +49,9 @@ namespace Batyushkova_lr1.Controllers
 
         // PUT: api/Tables/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // обновление данных стола
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutTable(int id, Table table)
         {
             if (id != table.Id)
@@ -75,7 +82,9 @@ namespace Batyushkova_lr1.Controllers
 
         // POST: api/Tables
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // добавление нового стола
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Table>> PostTable(Table table)
         {
             _context.Table.Add(table);
@@ -85,6 +94,7 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // DELETE: api/Tables/5
+        // удаление стола
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTable(int id)
         {
@@ -100,6 +110,7 @@ namespace Batyushkova_lr1.Controllers
             return NoContent();
         }
 
+        // проверка существованиея
         private bool TableExists(int id)
         {
             return _context.Table.Any(e => e.Id == id);

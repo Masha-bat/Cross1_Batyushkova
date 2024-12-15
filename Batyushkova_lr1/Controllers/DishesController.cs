@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Batyushkova_lr1.Data;
 using Batyushkova_lr1.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Configuration;
 
 namespace Batyushkova_lr1.Controllers
 {
@@ -22,6 +24,7 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // GET: api/Dishes
+        // список всех блюд
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Dish>>> GetDish()
         {
@@ -29,7 +32,9 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // GET: api/Dishes/5
+        // блюдо по id
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Dish>> GetDish(int id)
         {
             var dish = await _context.Dish.FindAsync(id);
@@ -44,7 +49,9 @@ namespace Batyushkova_lr1.Controllers
 
         // PUT: api/Dishes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // обновление блюда
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutDish(int id, Dish dish)
         {
             if (id != dish.Id)
@@ -75,7 +82,9 @@ namespace Batyushkova_lr1.Controllers
 
         // POST: api/Dishes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // добавление блюда
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Dish>> PostDish(Dish dish)
         {
             _context.Dish.Add(dish);
@@ -85,7 +94,9 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // DELETE: api/Dishes/5
+        // удаление блюда
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteDish(int id)
         {
             var dish = await _context.Dish.FindAsync(id);
@@ -100,6 +111,7 @@ namespace Batyushkova_lr1.Controllers
             return NoContent();
         }
 
+        // проверка существования блюда
         private bool DishExists(int id)
         {
             return _context.Dish.Any(e => e.Id == id);

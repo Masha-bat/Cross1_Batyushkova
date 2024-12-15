@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Batyushkova_lr1.Data;
 using Batyushkova_lr1.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Batyushkova_lr1.Controllers
 {
@@ -22,14 +23,18 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // GET: api/Orders
+        // получение всех заказов
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrder()
         {
             return await _context.Order.ToListAsync();
         }
 
         // GET: api/Orders/5
+        // получение заказа по id
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
             var order = await _context.Order.FindAsync(id);
@@ -44,7 +49,9 @@ namespace Batyushkova_lr1.Controllers
 
         // PUT: api/Orders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // обновление заказа
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutOrder(int id, Order order)
         {
             if (id != order.Id)
@@ -75,7 +82,9 @@ namespace Batyushkova_lr1.Controllers
 
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Добавление нового заказа
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Order>> PostOrder(Order order)
         {
             _context.Order.Add(order);
@@ -85,7 +94,9 @@ namespace Batyushkova_lr1.Controllers
         }
 
         // DELETE: api/Orders/5
+        // удаление заказа
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var order = await _context.Order.FindAsync(id);
@@ -100,6 +111,7 @@ namespace Batyushkova_lr1.Controllers
             return NoContent();
         }
 
+        //проверка существования заказа
         private bool OrderExists(int id)
         {
             return _context.Order.Any(e => e.Id == id);
