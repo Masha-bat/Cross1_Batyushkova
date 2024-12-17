@@ -25,6 +25,7 @@ namespace Batyushkova_lr1.Controllers
             }
             return AuthOptions.GenerateToken(user.IsAdmin);
         }
+
         [HttpGet("users")]
         public List<User> GetUsers()
         {
