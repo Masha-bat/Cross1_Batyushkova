@@ -110,6 +110,48 @@ namespace Batyushkova_lr1.Controllers
             return NoContent();
         }
 
+        // PUT: api/Tables/{id}/free
+        // Метод для освобождения стола
+        [HttpPut("{id}/free")]
+        [Authorize]
+        public async Task<IActionResult> FreeTable(int id)
+        {
+            // Ищем стол по ID
+            var table = await _context.Table.FindAsync(id);
+            if (table == null)
+            {
+                return NotFound(new { message = $"Стол с ID {id} не найден." });
+            }
+
+            // Проверяем, занят ли стол
+            if (!table.IsOccupied)
+            {
+                return BadRequest(new { message = $"Стол с ID {id} уже свободен." });
+            }
+
+            // Вызываем метод FreeTable для освобождения стола
+            table.FreeTable();
+
+            // Сохраняем изменения в базе данных
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Ошибка при освобождении стола: {ex.Message}");
+            }
+
+            // Возвращаем успешный ответ
+            return Ok(new
+            {
+                message = $"Стол с ID {id} успешно освобождён.",
+                TableStatus = new { table.Id, table.IsOccupied }
+            });
+        }
+
+
         // проверка существованиея
         private bool TableExists(int id)
         {

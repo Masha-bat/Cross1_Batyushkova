@@ -111,6 +111,64 @@ namespace Batyushkova_lr1.Controllers
             return NoContent();
         }
 
+        // GET: api/Dishes/count
+        // количество всех блюд
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetDishCount()
+        {
+            var count = await _context.Dish.CountAsync();
+            return Ok(count);
+        }
+
+        // Класс для передачи новой цены через тело запроса
+        public class UpdatePriceRequest
+        {
+            public decimal NewPrice { get; set; }
+        }
+
+        // PUT: api/Dishes/{id}/update-price
+        // Метод для обновления цены блюда через ввод
+        [HttpPut("{id}/update-price")]
+        [Authorize]
+        public async Task<IActionResult> UpdateDishPrice(int id, [FromBody] UpdatePriceRequest request)
+        {
+            // Проверка, что новый параметр передан корректно
+            if (request == null || request.NewPrice <= 0)
+            {
+                return BadRequest(new { message = "Некорректная цена. Цена должна быть больше 0." });
+            }
+
+            // Ищем блюдо по ID
+            var dish = await _context.Dish.FindAsync(id);
+            if (dish == null)
+            {
+                return NotFound(new { message = $"Блюдо с ID {id} не найдено." });
+            }
+
+            // Обновляем цену через метод модели
+            dish.UpdatePrice(request.NewPrice);
+
+            // Сохраняем изменения в базе данных
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Ошибка при обновлении цены блюда: {ex.Message}");
+            }
+
+            // Возвращаем успешный ответ с обновлённой информацией
+            return Ok(new
+            {
+                message = $"Цена блюда с ID {id} успешно обновлена.",
+                DishDetails = new { dish.Id, dish.Name, dish.Price }
+            });
+        }
+
+
+
         // проверка существования блюда
         private bool DishExists(int id)
         {

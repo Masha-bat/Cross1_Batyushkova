@@ -144,15 +144,12 @@ namespace Batyushkova_lr1.Controllers
             return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
-        // GET: api/Orders/table/{tableId}
-        // Получение списка заказанных блюд и итоговой суммы по ID стола
         [HttpGet("table/{tableId}")]
         public async Task<ActionResult> GetOrdersByTableId(int tableId)
         {
-            // Находим все заказы для конкретного стола
             var orders = await _context.Order
-                .Include(o => o.Dishes)  // Подгружаем список блюд
-                .Include(o => o.Table)   // Подгружаем информацию о столе
+                .Include(o => o.Dishes)
+                .Include(o => o.Table)
                 .Where(o => o.Table.Id == tableId)
                 .ToListAsync();
 
@@ -161,7 +158,6 @@ namespace Batyushkova_lr1.Controllers
                 return NotFound($"Заказы для стола с ID {tableId} не найдены.");
             }
 
-            // Формируем ответ
             var result = orders.Select(o => new
             {
                 OrderId = o.Id,
@@ -171,11 +167,12 @@ namespace Batyushkova_lr1.Controllers
                     DishName = d.Name,
                     DishPrice = d.Price
                 }),
-                TotalPrice = o.Dishes.Sum(d => d.Price)
+                TotalPrice = o.CalculateTotal() // Используем метод CalculateTotal
             });
 
             return Ok(result);
         }
+
 
 
         // DELETE: api/Orders/5
@@ -223,6 +220,40 @@ namespace Batyushkova_lr1.Controllers
                 }
             });
         }
+
+        // GET: api/Orders/table/{tableId}/dish-count
+        // Количество заказанных блюд на столе по ID стола
+        [HttpGet("table/{tableId}/dish-count")]
+        [Authorize]
+        public async Task<ActionResult> GetDishCountByTableId(int tableId)
+        {
+            // Проверяем, есть ли стол с таким ID
+            var tableExists = await _context.Table.AnyAsync(t => t.Id == tableId);
+            if (!tableExists)
+            {
+                return NotFound($"Стол с ID {tableId} не найден.");
+            }
+
+            // Получаем все заказы для указанного стола
+            var totalDishCount = await _context.Order
+                .Where(o => o.Table.Id == tableId)  // Фильтруем заказы по ID стола
+                .SelectMany(o => o.Dishes)         // Разворачиваем список блюд из заказов
+                .CountAsync();                     // Подсчитываем общее количество блюд
+
+            if (totalDishCount == 0)
+            {
+                return Ok(new { TableId = tableId, TotalDishesOrdered = totalDishCount, Message = "На этом столе нет заказов." });
+            }
+
+            return Ok(new
+            {
+                TableId = tableId,
+                TotalDishesOrdered = totalDishCount
+            });
+        }
+
+
+
 
 
         // Проверка существования заказа
