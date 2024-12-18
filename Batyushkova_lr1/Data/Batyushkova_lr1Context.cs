@@ -17,5 +17,7 @@ namespace Batyushkova_lr1.Data
         public DbSet<Batyushkova_lr1.Models.Dish> Dish { get; set; } = default!;
         public DbSet<Batyushkova_lr1.Models.Order> Order { get; set; } = default!;
         public DbSet<Batyushkova_lr1.Models.Table> Table { get; set; } = default!;
+        public object OrderDishes { get; internal set; }
+        public object Dishes { get; internal set; }
     }
 }

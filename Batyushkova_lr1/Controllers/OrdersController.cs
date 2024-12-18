@@ -29,6 +29,55 @@ namespace Batyushkova_lr1.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/Orders/averageCheck
+        // Получение среднего чека
+        [HttpGet("averageCheck")]
+        public async Task<ActionResult<double>> GetAverageCheck()
+        {
+            var orders = await _context.Order
+                .Include(o => o.Dishes)
+                .ToListAsync();
+
+            if (!orders.Any())
+            {
+                return Ok(0.0); // Return 0 if no orders exist
+            }
+
+            double totalSum = (double)orders.Sum(o => o.Dishes.Sum(d => d.Price));
+            double averageCheck = totalSum / orders.Count;
+
+            return Ok(averageCheck);
+        }
+
+        [HttpGet("popular-dish")]
+        public async Task<ActionResult> GetMostPopularDish()
+        {
+            // Получаем все заказы с блюдами
+            var allDishes = await _context.Order
+                .Include(o => o.Dishes)
+                .SelectMany(o => o.Dishes)
+                .ToListAsync();
+
+            if (!allDishes.Any())
+            {
+                return NotFound("Данные о блюдах отсутствуют.");
+            }
+
+            // Подсчитываем количество каждого блюда
+            var mostPopularDish = allDishes
+                .GroupBy(d => d.Id)
+                .Select(g => new
+                {
+                    DishId = g.Key,
+                    DishName = g.First().Name,
+                    TotalOrders = g.Count()
+                })
+                .OrderByDescending(d => d.TotalOrders)
+                .FirstOrDefault();
+
+            return Ok(mostPopularDish);
+        }
+
         // GET: api/Orders/5
         // Получение заказа по id с вложенными данными
         [HttpGet("{id}")]
@@ -144,6 +193,8 @@ namespace Batyushkova_lr1.Controllers
             return CreatedAtAction("GetOrder", new { id = order.Id }, order);
         }
 
+
+
         [HttpGet("table/{tableId}")]
         public async Task<ActionResult> GetOrdersByTableId(int tableId)
         {
@@ -252,10 +303,7 @@ namespace Batyushkova_lr1.Controllers
             });
         }
 
-
-
-
-
+ 
         // Проверка существования заказа
         private bool OrderExists(int id)
         {
